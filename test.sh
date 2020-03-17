@@ -25,7 +25,7 @@ else
     fi
     
     numbers=$1
-    echo $numbers
+    #echo $numbers
 fi
 
 
@@ -41,4 +41,4 @@ dd if=/dev/random bs=1 count=$numbers of=numbers > /dev/null  2>&1
 mpirun --prefix /usr/local/share/OpenMPI -np $numbers ots
 
 #uklid
-#rm -f ots numbers
+rm -f ots numbers
