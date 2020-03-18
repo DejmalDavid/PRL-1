@@ -7,6 +7,10 @@ Odd-even transposition sort
 #include <mpi.h>
 #include <fstream>
 
+#include <chrono>
+#include <unistd.h>
+
+#define TIME_COUNT
 #define TAG 0
 #define BUFSIZE 256    //maximalni mnozstvi hodnot
 
@@ -27,6 +31,15 @@ int main(int argc, char *argv[])
     MPI_Init(&argc,&argv);                          
     MPI_Comm_size(MPI_COMM_WORLD, &pocet_procesu);       
     MPI_Comm_rank(MPI_COMM_WORLD, &id);           
+
+    #ifdef TIME_COUNT
+    auto stage_1=chrono::steady_clock::now();
+    auto stage_2=chrono::steady_clock::now();
+    auto stage_3=chrono::steady_clock::now();
+    auto stage_4=chrono::steady_clock::now();
+    if(id == 0)  stage_1 = chrono::steady_clock::now();  
+    #endif    
+
 
     if(id == 0)    //hodnoty nacte master
     {
@@ -77,6 +90,10 @@ int main(int argc, char *argv[])
     //buffer,velikost,typ,rank odesilatele,tag, skupina, stat
     MPI_Recv(&moje_cislo, 1, MPI_INT, 0, TAG, MPI_COMM_WORLD, &stat); 
 
+    #ifdef TIME_COUNT
+    if(id == 0)  stage_2 = chrono::steady_clock::now();
+    #endif
+    
     //urcovani lichych/sudych
     bool flag=1;
     
@@ -102,8 +119,12 @@ int main(int argc, char *argv[])
         }
         flag=!flag; //preklopeni na z lichych na sude a obracene
     }
-
+    
     MPI_Send(&moje_cislo, 1, MPI_INT, 0, TAG,  MPI_COMM_WORLD); //poslani sveho cilsa sousedovi
+    
+    #ifdef TIME_COUNT
+    if(id == 0)  stage_3 = chrono::steady_clock::now();
+    #endif
     
     if(id == 0)    //hodnoty nacte master
     {
@@ -116,6 +137,20 @@ int main(int argc, char *argv[])
             cout<<pole_hodnot[i]<<endl;
         }
     }
+    
+    #ifdef TIME_COUNT
+    if(id == 0)  stage_4 = chrono::steady_clock::now();
+    #endif
+    
+    #ifdef TIME_COUNT 
+    if(id == 0)
+    {
+        cout<<"cas start_1:"<< chrono::duration_cast<chrono::nanoseconds>(stage_2 - stage_1).count()<<endl;
+        cout<<"cas start_2:"<< chrono::duration_cast<chrono::nanoseconds>(stage_3 - stage_2).count()<<endl;
+        cout<<"cas start_3:"<< chrono::duration_cast<chrono::nanoseconds>(stage_4 - stage_3).count()<<endl;
+        cout<<"cas start_all:"<< chrono::duration_cast<chrono::nanoseconds>(stage_4 - stage_1).count()<<endl;
+    }
+    #endif
     //hotovo
     MPI_Finalize(); 
     return 0;

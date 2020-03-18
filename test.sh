@@ -10,18 +10,12 @@ else
         echo "Parametr pocet_hodnot must be positive integer!"
         exit 2
     fi
-    
-    if  [ $1 -lt 2 ]
-    then
-        echo "Cannot sort less than 2 numbers!"
-        exit 3
-    fi
-    
+     
     #TODO maximalni hodnotu urcit
-    if  [ $1 -gt 32768 ]
+    if  [ $1 -gt 257 ]
     then
         echo "This is too much numbers, sorry..."
-        exit 4
+        exit 3
     fi
     
     numbers=$1
